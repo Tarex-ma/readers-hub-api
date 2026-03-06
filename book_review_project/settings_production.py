@@ -1,6 +1,8 @@
 from decouple import config
 import dj_database_url
 
+from book_review_project.book_review_project.settings import BASE_DIR
+
 # Security
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -47,10 +49,20 @@ if not EMAIL_HOST:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # File Storage (AWS S3 for production)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = 'us-east-1'
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = 'public-read'
+# Media files - For user uploads (Conditional for AWS S3 or local)
+import os
+# Check if AWS keys are set in the environment
+if config('AWS_ACCESS_KEY_ID', default=None) and config('AWS_SECRET_ACCESS_KEY', default=None) and config('AWS_STORAGE_BUCKET_NAME', default=None):
+    # AWS S3 Storage Configuration
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3b3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1') # Optional, with default
+    AWS_S3_FILE_OVERWRITE = config('AWS_S3_FILE_OVERWRITE', default=False, cast=bool)
+    AWS_DEFAULT_ACL = config('AWS_DEFAULT_ACL', default='public-read')
+else:
+    # Local file storage for development and default deployment
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
