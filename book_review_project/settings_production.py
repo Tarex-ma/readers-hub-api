@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from decouple import config
 import dj_database_url
 
@@ -50,7 +52,6 @@ if not EMAIL_HOST:
 
 # File Storage (AWS S3 for production)
 # Media files - For user uploads (Conditional for AWS S3 or local)
-import os
 # Check if AWS keys are set in the environment
 if config('AWS_ACCESS_KEY_ID', default=None) and config('AWS_SECRET_ACCESS_KEY', default=None) and config('AWS_STORAGE_BUCKET_NAME', default=None):
     # AWS S3 Storage Configuration
@@ -66,3 +67,4 @@ else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    BASE_DIR = Path(__file__).resolve().parent.parent
