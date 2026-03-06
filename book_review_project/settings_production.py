@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 from decouple import config
 import dj_database_url
+from .settings import *
+import sys
 
+print("INSTALLED_APPS from base:", INSTALLED_APPS, file=sys.stderr) 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,6 +16,18 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 # URL Configuration
 ROOT_URLCONF = 'book_review_project.urls'
 
+# But just to be safe, you can verify:
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 # =============================================================================
 # DATABASE - Use Render's DATABASE_URL
 # =============================================================================
@@ -91,8 +106,9 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if os.path.exists(os.path.
 # Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',  # IMPORTANT for admin
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
