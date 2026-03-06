@@ -31,7 +31,7 @@ X_FRAME_OPTIONS = 'DENY'
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    config('FRONTEND_URL'),
+    config('FRONTEND_URL', default='http://localhost:3000'),
 ]
 
 # Email (SMTP)
