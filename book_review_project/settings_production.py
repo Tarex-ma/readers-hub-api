@@ -6,11 +6,18 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
-# Database
+# =============================================================================
+# DATABASE - Use Render's DATABASE_URL
+# =============================================================================
+import dj_database_url
+
+# Use the DATABASE_URL environment variable that Render automatically provides
+# This is set by your blueprint from the 'readers-hub-db' database
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgresql://{config('DB_USER')}:{config('DB_PASSWORD')}@" \
-                f"{config('DB_HOST')}:{config('DB_PORT')}/{config('DB_NAME')}"
+        default=config('DATABASE_URL', default=None),
+        conn_max_age=600,
+        ssl_require=True  # Render requires SSL
     )
 }
 
