@@ -61,7 +61,6 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     config('FRONTEND_URL', default='http://localhost:3000'),
-    f"https://{config('ALLOWED_HOSTS', default='').split(',')[0]}" if config('ALLOWED_HOSTS', default='') else ''
 ]
 
 # Email (SMTP)
@@ -81,23 +80,13 @@ if not EMAIL_HOST:
 # File Storage (AWS S3 for production)
 # =============================================================================
 # Check if AWS keys are set in the environment
-if config('AWS_ACCESS_KEY_ID', default=None) and config('AWS_SECRET_ACCESS_KEY', default=None) and config('AWS_STORAGE_BUCKET_NAME', default=None):
-    # AWS S3 Storage Configuration
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
-    AWS_S3_FILE_OVERWRITE = config('AWS_S3_FILE_OVERWRITE', default=False, cast=bool)
-    AWS_DEFAULT_ACL = config('AWS_DEFAULT_ACL', default='public-read')
-    AWS_S3_VERIFY = True
-    AWS_S3_ADDRESSING_STYLE = "virtual"
-else:
-    # Local file storage for development and default deployment
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+    # Local file storage for development and default deployment
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -107,7 +96,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if os.path.exists(os.path.
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',  # IMPORTANT for admin
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
