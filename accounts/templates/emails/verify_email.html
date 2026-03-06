@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #4CAF50; color: white; padding: 10px; text-align: center; }
+        .button { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background: #4CAF50; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Reader's Hub! 📚</h1>
+        </div>
+        <p>Hi {{ user.username }},</p>
+        <p>Thank you for joining Reader's Hub! Please verify your email address to get started.</p>
+        <p>
+            <a href="{{ verification_url }}" class="button">Verify Email Address</a>
+        </p>
+        <p>Or copy this link: {{ verification_url }}</p>
+        <p>This link expires in 24 hours.</p>
+        <p>Happy reading!<br>The Reader's Hub Team</p>
+    </div>
+</body>
+</html>

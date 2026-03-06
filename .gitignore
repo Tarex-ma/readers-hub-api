@@ -1,0 +1,21 @@
+# Environment
+.env
+*.env
+
+# Database
+*.sqlite3
+*.db
+
+# Static files
+staticfiles/
+media/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+book_review_env/
+
+# Deployment configs (but keep render.yaml if you create it)
+# render.yaml  # Uncomment if you DON'T want to commit it
