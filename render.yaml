@@ -3,7 +3,7 @@ services:
   - type: web
     name: readers-hub-api
     runtime: python
-    repo: https://github.com/yourusername/readers-hub-api  # Change this!
+    repo: https://github.com/Tarex-ma/readers-hub-api  # 
     plan: free
     region: oregon  # or singapore, frankfurt, ohio
     branch: main
