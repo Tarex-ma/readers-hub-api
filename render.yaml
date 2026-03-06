@@ -3,7 +3,7 @@ services:
   - type: web
     name: readers-hub-api
     runtime: python
-    repo: https://github.com/Tarex-ma/readers-hub-api  # 
+    repo: https://github.com/Tarex-ma/readers-hub-api  
     plan: free
     region: oregon  # or singapore, frankfurt, ohio
     branch: main
@@ -28,7 +28,7 @@ services:
       - key: CORS_ALLOWED_ORIGINS
         value: https://your-react-frontend.com  # Change later
       - key: PYTHON_VERSION
-        value: 3.11.9
+        value: 3.13.5 
 
 databases:
   - name: readers-hub-db
