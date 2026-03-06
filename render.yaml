@@ -24,7 +24,7 @@ services:
       - key: WEB_CONCURRENCY
         value: 4
       - key: ALLOWED_HOSTS
-        value: ${RENDER_EXTERNAL_HOSTNAME}
+        value: readers-hub-api.onrender.com
       - key: FRONTEND_URL  
         value: https://your-react-frontend.com  # Change later
       - key: PYTHON_VERSION

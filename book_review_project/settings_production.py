@@ -17,9 +17,13 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 # ALLOWED_HOSTS
 allowed_hosts_env = config('ALLOWED_HOSTS', default='')
-ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
 
-# Fallback to safe default if ALLOWED_HOSTS is empty
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in allowed_hosts_env.split(',')
+    if host.strip()
+]
+
 if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ['readers-hub-api.onrender.com']
 
