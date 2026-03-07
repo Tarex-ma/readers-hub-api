@@ -45,12 +45,12 @@ urlpatterns = [
     path('', api_root),
 
     path('admin/', admin.site.urls),
-
-    path('api/accounts/', include('accounts.urls')),
-    path('api/books/', include('books.urls')),
-    path('api/activities/', include('activities.urls')),
-    path('api/comments/', include('comments.urls')),
-
+      # Versioned APIs
+    path('api/v1/accounts/', include('accounts.urls')),
+    path('api/v1/books/', include('books.urls')),
+    path('api/v1/activities/', include('activities.urls')),
+    path('api/v1/comments/', include('comments.urls')),
+      # Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0)),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0)),
     path('swagger.json/', schema_view.without_ui(cache_timeout=0)),
