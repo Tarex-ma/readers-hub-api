@@ -183,5 +183,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Prints to co
 # EMAIL_HOST_PASSWORD = 'your-app-password'
 
 # Site URL for email links
-SITE_URL = 'http://localhost:8000'  # Change in production
+SITE_URL = 'http://readers-hub-frontend.vercel.app'  # Change in production
 FRONTEND_URL = 'http://localhost:5173'  # React app URL
