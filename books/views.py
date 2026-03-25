@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, filters, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import APIView, api_view, permission_classes
 from django.shortcuts import get_object_or_404
@@ -17,6 +18,8 @@ from rest_framework.pagination import PageNumberPagination
 from .filters import BookFilter
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services.recommendations import RecommendationService
+from django.db.models import Q, Count, Avg
+import random
 
 
 class BookListView(generics.ListCreateAPIView):
@@ -191,19 +194,31 @@ class BookCoverUploadView(generics.UpdateAPIView):
 
 
 class RecommendationsView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
+        user = request.user
         limit = int(request.query_params.get('limit', 10))
-        recommendations = RecommendationService.get_recommendations_for_user(
-            request.user, limit
-        )
+        
+        # Get user's reading history
+        read_books = user.reading_list.filter(status='read').values_list('book_id', flat=True)
+        
+        # Get user's favorite genres
+        favorite_genres = user.favorite_genre or []
+        
+        # Get books from favorite genres that user hasn't read
+        recommendations = Book.objects.all()
+        
+        if favorite_genres:
+            recommendations = recommendations.filter(genre__in=favorite_genres)
+        
+        if read_books:
+            recommendations = recommendations.exclude(id__in=read_books)
+        
+        # Annotate with average rating and order
+        recommendations = recommendations.annotate(
+            avg_rating=Avg('reviews__rating')
+        ).order_by('-avg_rating', '-total_reviews')[:limit]
         
         serializer = BookListSerializer(recommendations, many=True)
-        return Response({
-            'recommendations': serializer.data,
-            'count': len(recommendations)
-        })
-    
-
-
+        return Response({'recommendations': serializer.data})

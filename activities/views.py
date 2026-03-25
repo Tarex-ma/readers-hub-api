@@ -4,20 +4,15 @@ from .models import Activity
 from .serializers import ActivitySerializer
 
 class FeedView(generics.ListAPIView):
-    """Get activity feed from users you follow"""
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ActivitySerializer
-    
+
     def get_queryset(self):
-        # Get users that the current user follows
-        following_users = self.request.user.following.values_list('followed', flat=True)
-        
-        # Get activities from followed users + own activities
+        following_users = self.request.user.following.values_list('followed_id', flat=True)
+
         return Activity.objects.filter(
             Q(user__in=following_users) | Q(user=self.request.user)
-        ).select_related('user').prefetch_related(
-            'content_type'
-        )[:50]  # Limit to 50 most recent activities
+        ).select_related('user').order_by('-created_at')[:50]
 
 class UserActivitiesView(generics.ListAPIView):
     """Get activities for a specific user"""

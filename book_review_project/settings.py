@@ -156,8 +156,8 @@ SIMPLE_JWT = {
 
 # CORS settings (for React frontend later)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 # Media files (for uploads)
@@ -184,4 +184,4 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Prints to co
 
 # Site URL for email links
 SITE_URL = 'http://localhost:8000'  # Change in production
-FRONTEND_URL = 'http://localhost:3000'  # React app URL
+FRONTEND_URL = 'http://localhost:5173'  # React app URL

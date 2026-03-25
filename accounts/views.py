@@ -1,15 +1,19 @@
 from django.shortcuts import get_object_or_404, render
-from rest_framework import generics, permissions, status,settings
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from .serializers import UserRegistrationSerializer, UserProfileSerializer, UserListSerializer,FollowSerializer,AvatarUploadSerializer,UserDetailWithStatsSerializer
-from .models import Follow,CustomUser
+from .serializers import (
+    UserRegistrationSerializer, UserProfileSerializer, UserListSerializer,
+    FollowSerializer, AvatarUploadSerializer, UserDetailWithStatsSerializer
+)
+from .models import Follow, CustomUser
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from .utils.email_utils import send_verification_email, send_welcome_email
 import jwt
+from django.conf import settings
 
 User = get_user_model()
 
@@ -28,8 +32,11 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
-    serializer_class = UserListSerializer
     permission_classes = (permissions.AllowAny,)
+    
+    def get_serializer_class(self):
+        # Use the detailed serializer that includes stats
+        return UserDetailWithStatsSerializer
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -50,9 +57,8 @@ class FollowView(generics.GenericAPIView):
             )
         
         follow, created = request.user.follow(user_to_follow)
-        
+
         if created:
-            # Create activity
             from activities.models import Activity
             from django.contrib.contenttypes.models import ContentType
             Activity.objects.create(
@@ -93,7 +99,6 @@ class FollowingListView(generics.ListAPIView):
         user_id = self.kwargs['user_id']
         return Follow.objects.filter(follower_id=user_id).select_related('followed')
 
-
 class AvatarUploadView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AvatarUploadSerializer
@@ -102,7 +107,7 @@ class AvatarUploadView(generics.UpdateAPIView):
     
     def get_object(self):
         return self.request.user
-    
+
 class RequestVerificationEmailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -149,7 +154,6 @@ class VerifyEmailView(APIView):
             user.email_verified = True
             user.save()
             
-            # Send welcome email
             send_welcome_email(user)
             
             return Response(
