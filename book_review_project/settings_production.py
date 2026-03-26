@@ -104,6 +104,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",                    # Local development
     "http://127.0.0.1:5173",                    # Local development alternative
     "https://readers-hub-frontend.vercel.app",  # Your production frontend
+    "https://readers-hub-frontend-agwp-4431tl0vw-tarikumato-7369s-projects.vercel.app",
 ]
 
 # If FRONTEND_URL is set in environment and not already in list, add it
