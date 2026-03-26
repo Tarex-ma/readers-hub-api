@@ -94,23 +94,60 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # ===============================
-# CORS
+# CORS - FIXED: Allow both localhost and Vercel
 # ===============================
 
+# Get frontend URL from environment or use default
+frontend_url = config('FRONTEND_URL', default='http://localhost:5173')
+
 CORS_ALLOWED_ORIGINS = [
-    config('FRONTEND_URL', default='http://localhost:3000')
+    "http://localhost:5173",                    # Local development
+    "http://127.0.0.1:5173",                    # Local development alternative
+    "https://readers-hub-frontend.vercel.app",  # Your production frontend
 ]
+
+# If FRONTEND_URL is set in environment and not already in list, add it
+if frontend_url not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Allow all methods (GET, POST, PUT, DELETE, etc.)
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Allow these headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 
 # ===============================
-# CSRF
+# CSRF - FIXED: Add Vercel domain
 # ===============================
 
 CSRF_TRUSTED_ORIGINS = [
-    config('FRONTEND_URL', default='http://localhost:3000')
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://readers-hub-frontend.vercel.app",
 ]
+
+if frontend_url not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(frontend_url)
 
 
 # ===============================
