@@ -4,6 +4,10 @@ from decouple import config
 import dj_database_url
 from .settings import *
 
+# Cloudinary imports
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -83,14 +87,29 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# MEDIA FILES - CLOUDINARY
+# ===============================
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dvqnpkbbm',     
+    'API_KEY': '671673844455157',           
+    'API_SECRET': 'vKas0pu1zPSoXavj0V88W7nwDbs',    
+}
 
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=True
+)
 # ===============================
 # MEDIA FILES
 # ===============================
 
-MEDIA_URL = '/media/'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if DEBUG:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # ===============================
@@ -122,7 +141,9 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
 # Allow these headers
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -145,6 +166,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://readers-hub-frontend.vercel.app",
+    "https://readers-hub-frontend-agwp-4431tl0vw-tarikumato-7369s-projects.vercel.app",
 ]
 
 if frontend_url not in CSRF_TRUSTED_ORIGINS:
