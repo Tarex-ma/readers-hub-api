@@ -34,5 +34,5 @@ databases:
   - name: readers-hub-db
     plan: free
     region: oregon
-    databaseName: readershub  # optional
-    user: readershub_user      # optional
+    databaseName: readershub  
+    user: readershub_user      
