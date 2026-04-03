@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'comments',
     'drf_yasg',
     'django_filters',
+    'cloudinary',
+    'cloudinary_storage',
+
 ]
 
 MIDDLEWARE = [

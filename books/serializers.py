@@ -9,9 +9,16 @@ class BookSerializer(serializers.ModelSerializer):
         read_only_fields = ('average_rating', 'total_reviews', 'created_at', 'updated_at')
 
 class BookListSerializer(serializers.ModelSerializer):
+    cover_image = serializers.SerializerMethodField()
+
     class Meta:
         model = Book
         fields = ('id', 'title', 'author', 'genre', 'cover_image', 'average_rating', 'total_reviews')
+
+    def get_cover_image(self, obj):
+        if obj.cover_image:
+            return obj.cover_image.url
+        return None
 
 class ReviewSerializer(serializers.ModelSerializer):
     user_details = UserListSerializer(source='user', read_only=True)
