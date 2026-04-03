@@ -20,6 +20,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .services.recommendations import RecommendationService
 from django.db.models import Q, Count, Avg
 import random
+from django.core.files.storage import default_storage
+
 
 
 class BookListView(generics.ListCreateAPIView):
@@ -34,11 +36,12 @@ class BookListView(generics.ListCreateAPIView):
         if self.request.method == 'GET':
             return BookListSerializer
         return BookSerializer
-
+print(default_storage.__class__)
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    parser_classes = [MultiPartParser, FormParser]
 
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
