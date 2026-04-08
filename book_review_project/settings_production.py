@@ -1,135 +1,136 @@
 import os
 from pathlib import Path
-from decouple import config
-import dj_database_url
-from .settings import *  # base settings
+from decouple import config, Csv
 
-# ===============================
-# BASE DIR
-# ===============================
+# -------------------------------
+# BASE DIRECTORY
+# -------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ===============================
+# -------------------------------
 # SECURITY
-# ===============================
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = False  # Must be False for Cloudinary
+# -------------------------------
+SECRET_KEY = config("SECRET_KEY", default="unsafe-secret-key")
+DEBUG = config("DEBUG", default=False, cast=bool)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='readers-hub-api.onrender.com').split(',')
+# -------------------------------
+# DATABASE (PostgreSQL recommended for production)
+# -------------------------------
+import dj_database_url
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-
-# ===============================
-# DATABASE
-# ===============================
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
+    "default": dj_database_url.config(
+        default=config(
+            "DATABASE_URL",
+            default="postgres://user:password@localhost:5432/dbname"
+        ),
         conn_max_age=600,
-        ssl_require=True
     )
 }
 
-# ===============================
-# STATIC FILES
-# ===============================
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# -------------------------------
+# STATIC & MEDIA FILES
+# -------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
+
+# WhiteNoise for static file serving
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# ===============================
-# CLOUDINARY MEDIA STORAGE
-# ===============================
+# -------------------------------
+# CLOUDINARY (Safe defaults if missing)
+# -------------------------------
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME", default="dummy_cloud_name"),
+    "API_KEY": config("CLOUDINARY_API_KEY", default="dummy_api_key"),
+    "API_SECRET": config("CLOUDINARY_API_SECRET", default="dummy_api_secret"),
 }
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Configure Cloudinary
-import cloudinary
-cloudinary.config(
-    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
-    api_key=CLOUDINARY_STORAGE['API_KEY'],
-    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-    secure=True
-)
-
-# ===============================
-# CORS
-# ===============================
-FRONTEND_URL = config('FRONTEND_URL', default='https://readers-hub-frontend.vercel.app')
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    FRONTEND_URL
-]
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = ['DELETE','GET','OPTIONS','PATCH','POST','PUT']
-CORS_ALLOW_HEADERS = [
-    'accept', 'accept-encoding', 'authorization', 'content-type',
-    'dnt', 'origin', 'user-agent', 'x-csrftoken', 'x-requested-with'
+# -------------------------------
+# DJANGO APPS
+# -------------------------------
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Third-party
+    "cloudinary_storage",
+    "cloudinary",
+    "corsheaders",
+    "rest_framework",
+    "django_filters",
+    "drf_yasg",
+    "django_allauth",
+    # Your apps
+    "books",  # replace with your apps
 ]
 
-# ===============================
-# CSRF
-# ===============================
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    FRONTEND_URL
+# -------------------------------
+# MIDDLEWARE
+# -------------------------------
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# ===============================
-# EMAIL (Optional)
-# ===============================
-EMAIL_HOST = config('EMAIL_HOST', default=None)
-if EMAIL_HOST:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_USE_TLS = True
-    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@readershub.com')
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# ===============================
+# -------------------------------
 # REST FRAMEWORK
-# ===============================
+# -------------------------------
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ],
 }
 
-# ===============================
-# LOGGING
-# ===============================
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {'console': {'class': 'logging.StreamHandler'}},
-    'root': {'handlers': ['console'], 'level': 'WARNING'},
-    'loggers': {'django': {'handlers': ['console'], 'level': 'INFO', 'propagate': False}},
-}
+# -------------------------------
+# CORS
+# -------------------------------
+CORS_ALLOW_ALL_ORIGINS = True  # Set to False in strict production
+
+# -------------------------------
+# TIMEZONE & LANGUAGE
+# -------------------------------
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+# -------------------------------
+# EMAIL (Optional, for production)
+# -------------------------------
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.example.com")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+
+# -------------------------------
+# SECURITY HEADERS
+# -------------------------------
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+
+# -------------------------------
+# DEFAULT AUTO FIELD
+# -------------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
