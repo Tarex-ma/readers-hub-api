@@ -41,7 +41,7 @@ class Book(models.Model):
     
     def update_rating(self):
         """Update average rating based on all reviews"""
-        from .models import Review  # Import here to avoid circular import
+        from .models import Review  
         reviews = self.reviews.all()
         if reviews:
             self.average_rating = sum(r.rating for r in reviews) / len(reviews)

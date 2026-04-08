@@ -24,24 +24,64 @@ from django.core.files.storage import default_storage
 
 
 
+# books/views.py
+
+from rest_framework import generics, permissions, status
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from .models import Book
+from .serializers import BookSerializer, BookListSerializer, BookDetailSerializer
+
+# ----------------------------
+# Book List/Create View
+# ----------------------------
 class BookListView(generics.ListCreateAPIView):
+    """
+    GET: List all books with pagination, filtering, searching, and ordering.
+    POST: Create a new book with optional cover image upload.
+    """
     queryset = Book.objects.all()
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]  # Supports file uploads
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['genre', 'author']
-    search_fields = ['title', 'author', 'isbn']
-    ordering_fields = ['title', 'publication_year', 'average_rating']
+    search_fields = ['title', 'author', 'isbn', 'description']
+    ordering_fields = ['title', 'publication_year', 'average_rating', 'created_at']
     
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return BookListSerializer
         return BookSerializer
-print(default_storage.__class__)
+    
+    def perform_create(self, serializer):
+        """
+        Save the book. The cover image will automatically upload to Cloudinary
+        in production if DEFAULT_FILE_STORAGE is set to MediaCloudinaryStorage.
+        """
+        serializer.save()
+
+
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET: Retrieve a single book with full details.
+    PUT/PATCH: Update book info including uploading a new cover image.
+    DELETE: Delete a book.
+    """
     queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]  # Allows updating cover image
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return BookDetailSerializer
+        return BookSerializer
+    
+    def perform_update(self, serializer):
+        """
+        Save updates to the book. Cover images are updated seamlessly
+        whether stored locally or on Cloudinary.
+        """
+        serializer.save()
 
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer

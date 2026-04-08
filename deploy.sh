@@ -1,23 +1,43 @@
 #!/bin/bash
 
-echo "🚀 Deploying Reader's Hub API..."
+echo "🚀 Starting deployment..."
 
-# Pull latest changes
-git pull origin main
+# Step 1: Check .env
+if [ ! -f .env ]; then
+  echo "❌ .env file not found!"
+  exit 1
+fi
+echo "✅ .env file found"
 
-# Install/update dependencies
+# Step 2: Activate venv
+if [ -d "book_review_env" ]; then
+  source book_review_env/bin/activate
+  echo "✅ Virtual environment activated"
+fi
+
+# Step 3: Install dependencies
+echo "📦 Installing dependencies..."
 pip install -r requirements.txt
 
-# Run migrations
+# Step 4: Django check
+echo "🔌 Checking Django..."
+python manage.py check || exit 1
+
+# Step 5: Migrations
+echo "🛠 Running migrations..."
+python manage.py makemigrations
 python manage.py migrate
 
-# Collect static files
+# Step 6: Collect static
+echo "📁 Collecting static..."
 python manage.py collectstatic --noinput
 
-# Restart application server (example for Gunicorn)
-sudo systemctl restart gunicorn
+# Step 7: Optional superuser
+read -p "Create superuser? (y/n): " choice
+if [ "$choice" = "y" ]; then
+  python manage.py createsuperuser
+fi
 
-# Restart Nginx
-sudo systemctl restart nginx
-
-echo "✅ Deployment complete!"
+# Step 8: Run server
+echo "🔥 Starting server..."
+python manage.py runserver

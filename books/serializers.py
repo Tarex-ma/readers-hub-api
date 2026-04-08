@@ -1,24 +1,77 @@
 from rest_framework import serializers
 from .models import Book, ReadingList, Review
 from accounts.serializers import UserListSerializer
+from cloudinary.models import CloudinaryField
+# books/serializers.py
 
 class BookSerializer(serializers.ModelSerializer):
+    cover_image = serializers.SerializerMethodField()
+    reviews_count = serializers.IntegerField(source='total_reviews', read_only=True)
+    average_rating = serializers.FloatField(read_only=True)
+
     class Meta:
         model = Book
-        fields = '__all__'
-        read_only_fields = ('average_rating', 'total_reviews', 'created_at', 'updated_at')
+        fields = [
+            'id', 'title', 'author', 'isbn', 'genre', 'publication_year', 'publisher',
+            'cover_image', 'description', 'page_count',
+            'average_rating', 'reviews_count', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ('average_rating', 'reviews_count', 'created_at', 'updated_at')
+
+    def get_cover_image(self, obj):
+        """
+        Returns a fully qualified URL for the cover image.
+        Works both in local dev (MEDIA_URL) and Cloudinary production.
+        """
+        if obj.cover_image:
+            request = self.context.get('request')
+            try:
+                # For Cloudinary, this will be an absolute URL already
+                url = obj.cover_image.url
+            except ValueError:
+                return None
+
+            # Build absolute URL for frontend
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
 
 class BookListSerializer(serializers.ModelSerializer):
     cover_image = serializers.SerializerMethodField()
+    average_rating = serializers.FloatField(read_only=True)
+    reviews_count = serializers.IntegerField(source='total_reviews', read_only=True)
 
     class Meta:
         model = Book
-        fields = ('id', 'title', 'author', 'genre', 'cover_image', 'average_rating', 'total_reviews')
+        fields = ('id', 'title', 'author', 'genre', 'cover_image', 'average_rating', 'reviews_count')
 
     def get_cover_image(self, obj):
         if obj.cover_image:
-            return obj.cover_image.url
+            request = self.context.get('request')
+            url = obj.cover_image.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
         return None
+
+
+class BookDetailSerializer(BookSerializer):
+    """
+    Extends BookSerializer with all reviews included.
+    """
+    reviews = serializers.SerializerMethodField()
+
+    class Meta(BookSerializer.Meta):
+        fields = BookSerializer.Meta.fields + ['reviews']
+
+    def get_reviews(self, obj):
+        from .serializers import ReviewSerializer
+        reviews = obj.reviews.all().select_related('user')
+        serializer = ReviewSerializer(reviews, many=True, context=self.context)
+        return serializer.data
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     user_details = UserListSerializer(source='user', read_only=True)
@@ -45,14 +98,6 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(id=request.user.id).exists()
         return False
-
-class BookDetailSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True, read_only=True)
-    reviews_count = serializers.IntegerField(source='total_reviews', read_only=True)
-    
-    class Meta:
-        model = Book
-        fields = '__all__'
 
 # Add to books/serializers.py
 class ReadingListSerializer(serializers.ModelSerializer):
