@@ -53,6 +53,11 @@ DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 # -------------------------------
 # DJANGO APPS
 # -------------------------------
+ROOT_URLCONF = "book_review_project.urls"
+WSGI_APPLICATION = "book_review_project.wsgi.application"
+
+AUTH_USER_MODEL = "accounts.CustomUser"
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -67,13 +72,25 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_yasg",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
     # Your apps
+    "accounts",
     "books",  # replace with your apps
 ]
-
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
 # -------------------------------
 # MIDDLEWARE
 # -------------------------------
@@ -85,7 +102,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'allauth.account.middleware.AccountMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
