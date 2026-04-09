@@ -73,8 +73,10 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_yasg",
     # Your apps
-    "accounts",
-    "books",  # replace with your apps
+    'accounts',
+    'books',
+    'activities',
+    'comments',  
 ]
 TEMPLATES = [
     {
