@@ -67,7 +67,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_yasg",
-    "django_allauth",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # Your apps
     "books",  # replace with your apps
 ]
