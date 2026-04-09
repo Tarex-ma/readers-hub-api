@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'drf_yasg',
     'cloudinary',
     'cloudinary_storage',
-
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     # Local apps
     'accounts',
     'books',
