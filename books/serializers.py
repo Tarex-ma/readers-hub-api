@@ -5,7 +5,6 @@ from cloudinary.models import CloudinaryField
 # books/serializers.py
 
 class BookSerializer(serializers.ModelSerializer):
-    cover_image = serializers.SerializerMethodField()
     reviews_count = serializers.IntegerField(source='total_reviews', read_only=True)
     average_rating = serializers.FloatField(read_only=True)
 
@@ -18,24 +17,19 @@ class BookSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ('average_rating', 'reviews_count', 'created_at', 'updated_at')
 
-    def get_cover_image(self, obj):
-        """
-        Returns a fully qualified URL for the cover image.
-        Works both in local dev (MEDIA_URL) and Cloudinary production.
-        """
-        if obj.cover_image:
-            request = self.context.get('request')
-            try:
-                # For Cloudinary, this will be an absolute URL already
-                url = obj.cover_image.url
-            except ValueError:
-                return None
+    def to_representation(self, instance):
+        """Convert image to full URL AFTER saving"""
+        data = super().to_representation(instance)
+        request = self.context.get('request')
 
-            # Build absolute URL for frontend
+        if instance.cover_image:
+            url = instance.cover_image.url
             if request:
-                return request.build_absolute_uri(url)
-            return url
-        return None
+                data['cover_image'] = request.build_absolute_uri(url)
+            else:
+                data['cover_image'] = url
+
+        return data
 
 
 class BookListSerializer(serializers.ModelSerializer):

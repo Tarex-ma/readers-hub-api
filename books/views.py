@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, filters, status
+from rest_framework import generics, permissions, filters, status 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import APIView, api_view, permission_classes
@@ -43,6 +43,7 @@ class BookListView(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     parser_classes = [MultiPartParser, FormParser]  # Supports file uploads
+    
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['genre', 'author']
     search_fields = ['title', 'author', 'isbn', 'description']
@@ -52,13 +53,6 @@ class BookListView(generics.ListCreateAPIView):
         if self.request.method == 'GET':
             return BookListSerializer
         return BookSerializer
-    
-    def perform_create(self, serializer):
-        """
-        Save the book. The cover image will automatically upload to Cloudinary
-        in production if DEFAULT_FILE_STORAGE is set to MediaCloudinaryStorage.
-        """
-        serializer.save()
 
 
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
