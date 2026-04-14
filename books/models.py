@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from cloudinary.models import CloudinaryField
 class Book(models.Model):
     GENRE_CHOICES = [
         ('fiction', 'Fiction'),
@@ -22,7 +22,7 @@ class Book(models.Model):
     genre = models.CharField(max_length=20, choices=GENRE_CHOICES)
     publication_year = models.IntegerField()
     publisher = models.CharField(max_length=100, blank=True)
-    cover_image = models.ImageField(upload_to='book_covers/', null=True, blank=True)
+    cover_image = CloudinaryField('image', blank=True, null=True)
     description = models.TextField()
     page_count = models.IntegerField(null=True, blank=True)
     
