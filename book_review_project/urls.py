@@ -13,7 +13,14 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.conf import settings
+from django.http import JsonResponse
 
+def check_debug(request):
+    return JsonResponse({
+        "DEBUG": settings.DEBUG,
+        "STORAGE": settings.DEFAULT_FILE_STORAGE,
+    })
 
 # ===============================
 # Root API View
@@ -51,6 +58,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
       # Versioned APIs
+    path('check-debug/', check_debug),
     path('api/v1/accounts/', include('accounts.urls')),
     path('api/v1/books/', include('books.urls')),
     path('api/v1/activities/', include('activities.urls')),
